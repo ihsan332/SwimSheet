@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Create a New Session</h1>
+    <form method="post" action="{{ url_for('newsession') }}">
+        <label for="session_id">Session ID:</label><br>
+        <input type="number" id="session_id" name="session_id" required><br><br>
+
+        <select name="level" id="level" required>
+            <option value="">Select Level</option>
+            <option value="Beginner">Preschool 4</option>
+        </select><br><br>
+
+        <label for="time">Time:</label><br>
+        <input type="text" id="time" name="time" maxlength="20" required><br><br>
+        
+        <label for="Weekdays">Weekdays:</label><br>
+        <input type="text" id="weekdays" name="weekdays" maxlength="20" required><br><br>
+
+        <label for="Pool">Pool:</label><br>
+        <input type="text" id="pool" name="pool" maxlength="50" required><br><br>
+
+        <label for="Enrolled">Enrolled:</label><br>
+        <input type="number" id="enrolled" name="enrolled" required><br><br>
+
+        <h2> Optional </h2><br><br>
+
+        <label for="Evaluated">Evaluated:</label><br>
+        <input type="number" id="evaluated" name="evaluated"><br><br>
+
+        <label for="Completed">Completed:</label><br>
+        <input type="number" id="completed" name="completed"><br><br>
+
+        <label for="Incomplete">Incomplete:</label><br>
+        <input type="number" id="incomplete" name="incomplete"><br><br>
+
+        <input type="submit" value="Create Session">
+    </form>
+{% endblock %}

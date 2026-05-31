@@ -1,0 +1,11 @@
+[project]
+version = "0.1.0"
+name = "LTGenerator"
+description = "Swim Plan and Test Sheet Generator"
+dependencies = [
+    "flask",
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"

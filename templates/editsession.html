@@ -1,0 +1,48 @@
+<!-- TODO: Implement the edit class functionality -->
+{% extends "base.html" %}
+
+{% block content %}
+    <h1> Edit class </h1>
+    <p> Here you can edit your class. </p>
+    <div class="session">
+        <form method="POST">
+            <div class="generalsessionelements">
+                <label for="session">Session:</label>
+                <input type="text" id="session" name="session"><br><br>
+                <label for="weekdays">Weekdays:</label>
+                <input type="text" id="weekdays" name="weekdays"><br><br>
+                <label for="pool">Pool:</label>
+                <input type="text" id="pool" name="pool"><br><br>
+                <label for="levelid">Level ID:</label>
+                <input type="text" id="levelid" name="levelid"><br><br>
+                <label for="enrolled">Enrolled:</label>
+                <input type="text" id="enrolled" name="enrolled"><br><br>
+                <label for="evaluated">Evaluated:</label>
+                <input type="text" id="evaluated" name="evaluated"><br><br>
+                <label for="completed">Completed:</label>
+                <input type="text" id="completed" name="completed"><br><br>
+                <label for="incomplete">Incomplete:</label>
+                <input type="text" id="incomplete" name="incomplete"><br><br>
+            </div>
+            <div class="studentnames">
+                <input type="text" id="student1" name="student1"><br><br>
+                <input type="text" id="student2" name="student2"><br><br>
+                <input type="text" id="student3" name="student3"><br><br>
+                <input type="text" id="student4" name="student4"><br><br>
+                <input type="text" id="student5" name="student5"><br><br>
+                <input type="text" id="student6" name="student6"><br><br>
+                <input type="text" id="student7" name="student7"><br><br>
+                <input type="text" id="student8" name="student8"><br><br>
+            </div>
+            <div class="checkboxarray">
+                {% for i in range(1,9) %}
+                        <br><br>
+                        {% for j in range (1, skillcount) %}
+                            <input type="checkbox" id="student{{i}}_skill{{j}}" name="student{{i}}_skill{{j}}"> 
+                        {% endfor %}
+                {% endfor %}
+            </div>
+            <input type="submit" value="Save Changes">
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1> Edit sessions </h1>
+    <p> Here you can edit your sessions. </p>
+    {% for session in sessions %}
+        <div class="session">
+            <h2>{{ session.Level.name }} ({{ session.time }})</h2>
+            <p>{{ session.pool }}</p>
+            <a href="{{ url_for('editsession', session_id=session.sessionid) }}">Edit</a>
+        </div>
+    {% endfor %}
+{% endblock %}

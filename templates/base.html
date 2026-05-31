@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <header>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('welcome') }}">Home</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            </ul>
+        </nav>
+        </header>
+        <main>
+            {% block content %}{% endblock %}
+            
+        </body>
+        <footer>
+            <p>LTGenerator 2026</p>
+            <small>Created by Ihsan</small>
+            <small>Contact at ihsannismail@gmail.com for support</small>
+        </footer>
+</html>
