@@ -1,5 +1,14 @@
 {% extends "base.html" %}
+
 {% block content %}
-    <h1>Welcome to the LT Generator!</h1>
-    <p>Please <a href="{{ url_for('register') }}">register</a> or <a href="{{ url_for('login') }}">login</a> to continue.</p>
+<section class="welcome-page">
+    <h1>Welcome To SwimSheet</h1>
+    <h2>Current Season - Summer 2026</h2>
+    <p>
+        This tool allows you to Create, Edit, Save, and Print City of Toronto test sheets.
+        Test Sheets are downloable as PDF's and securely stored in a PostgreSQL Database.
+        This site is only intended for use by select swim instructors.
+        If you are having trouble using the software or would like to report a bug contact the email below.
+    </p>
+</section>
 {% endblock %}

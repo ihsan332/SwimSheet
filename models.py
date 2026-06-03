@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
 from flask_login import UserMixin
 
-
+# Instructor model
 class Instructor(Base, UserMixin):
     __tablename__ = "instructors"
     iid = db.Column(db.Integer, primary_key=True)
@@ -17,7 +17,8 @@ class Instructor(Base, UserMixin):
         return f"<Instructor {self.name}>"
     def get_id(self):
         return str(self.iid)
-    
+
+# Student model
 class Student(Base):
     __tablename__ = "students"
     sid = db.Column(db.Integer, primary_key=True)
@@ -25,9 +26,16 @@ class Student(Base):
     sessionid = db.Column(db.BigInteger, db.ForeignKey("sessions.sessionid"), nullable=False)
     status = db.Column(db.String(20), nullable=False)
     Session = db.relationship("Session", backref="students")
+    studentresults = db.relationship(
+        "studentresults",
+        back_populates="Student",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
     def __repr__(self):
         return f"<Student {self.name}>"
-    
+
+# Session model
 class Session(Base):
     __tablename__ = "sessions"
     sessionid = db.Column(db.BigInteger, primary_key=True)
@@ -46,6 +54,7 @@ class Session(Base):
     def __repr__(self):
         return f"<Session {self.sessionid}>"
 
+# Level model
 class Level(Base):
     __tablename__ = "levels"
     levelid = db.Column(db.Integer, primary_key=True)
@@ -54,6 +63,7 @@ class Level(Base):
     def __repr__(self):
         return f"<Level {self.name}>"
 
+# Skills model
 class Skills(Base):
     __tablename__ = "skills"
     skillid = db.Column(db.Integer, primary_key=True)
@@ -63,7 +73,8 @@ class Skills(Base):
     Level = db.relationship("Level", backref="skills")
     def __repr__(self):
         return f"<Skill {self.name}>"
-    
+
+# Levelskills model
 class levelskills(Base):
     __tablename__ = "levelskills"
     levelid = db.Column(db.Integer, db.ForeignKey("levels.levelid"), nullable=False, primary_key=True)
@@ -72,10 +83,16 @@ class levelskills(Base):
     Level = db.relationship("Level", backref="levelskills")
     Skills = db.relationship("Skills", backref="levelskills")
 
+# Studentresults model
 class studentresults(Base):
     __tablename__ = "studentresults"
-    sid = db.Column(db.Integer, db.ForeignKey("students.sid"), nullable=False, primary_key=True)
+    sid = db.Column(
+        db.Integer,
+        db.ForeignKey("students.sid", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True,
+    )
     skillid = db.Column(db.Integer, db.ForeignKey("skills.skillid"), nullable=False, primary_key=True)
     result = db.Column(db.String(1), nullable=False)
-    Student = db.relationship("Student", backref="studentresults")
+    Student = db.relationship("Student", back_populates="studentresults")
     Skills = db.relationship("Skills", backref="studentresults")

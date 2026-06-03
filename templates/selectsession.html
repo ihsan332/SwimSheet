@@ -1,13 +1,24 @@
-{% extends "base.html" %}
-
-{% block content %}
-    <h1> Edit sessions </h1>
-    <p> Here you can edit your sessions. </p>
-    {% for session in sessions %}
-        <div class="session">
-            <h2>{{ session.Level.name }} ({{ session.time }})</h2>
-            <p>{{ session.pool }}</p>
-            <a href="{{ url_for('editsession', session_id=session.sessionid) }}">Edit</a>
-        </div>
-    {% endfor %}
-{% endblock %}
+{% extends "base.html" %}
+
+{% block content %}
+<section class="selectsession-page">
+    <h1>Edit Sessions</h1>
+    <p>Select a session to edit.</p>
+    <div class="session-grid">
+        {% for session in sessions %}
+        <div class="session-card-wrap">
+            <a class="session-card" href="{{ url_for('editsession', session_id=session.sessionid) }}">
+                <article>
+                    <h2 class="session-card-title">{{ session.Level.name }}</h2>
+                    <p class="session-card-detail">{{ session.time }}</p>
+                    <p class="session-card-detail">{{ session.pool }}</p>
+                    <p class="session-card-detail">{{ session.weekdays }}</p>
+                </article>
+            </a>
+        </div>
+        {% else %}
+        <p class="session-empty">No sessions found. <a href="{{ url_for('newsession') }}">Create one.</a></p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

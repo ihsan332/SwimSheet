@@ -1,23 +1,44 @@
 <!DOCTYPE html>
-<html>
-    <body>
-        <header>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LTGenerator{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/contextcss.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="app-header">
         <nav>
             <ul>
                 <li><a href="{{ url_for('welcome') }}">Home</a></li>
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                {% else %}
                 <li><a href="{{ url_for('login') }}">Login</a></li>
                 <li><a href="{{ url_for('register') }}">Register</a></li>
+                {% endif %}
                 <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
             </ul>
         </nav>
-        </header>
-        <main>
-            {% block content %}{% endblock %}
-            
-        </body>
-        <footer>
-            <p>LTGenerator 2026</p>
-            <small>Created by Ihsan</small>
-            <small>Contact at ihsannismail@gmail.com for support</small>
-        </footer>
+    </header>
+    <main class="app-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="flash flash-{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="app-footer">
+        <p>SwimSheet 2026</p>
+        <small>Created by Ihsan</small>
+        <small>Contact at ihsannismail@gmail.com for support</small>
+    </footer>
+</body>
 </html>

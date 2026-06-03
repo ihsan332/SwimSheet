@@ -1,48 +1,271 @@
-<!-- TODO: Implement the edit class functionality -->
 {% extends "base.html" %}
 
 {% block content %}
-    <h1> Edit class </h1>
-    <p> Here you can edit your class. </p>
-    <div class="session">
-        <form method="POST">
-            <div class="generalsessionelements">
-                <label for="session">Session:</label>
-                <input type="text" id="session" name="session"><br><br>
-                <label for="weekdays">Weekdays:</label>
-                <input type="text" id="weekdays" name="weekdays"><br><br>
-                <label for="pool">Pool:</label>
-                <input type="text" id="pool" name="pool"><br><br>
-                <label for="levelid">Level ID:</label>
-                <input type="text" id="levelid" name="levelid"><br><br>
-                <label for="enrolled">Enrolled:</label>
-                <input type="text" id="enrolled" name="enrolled"><br><br>
-                <label for="evaluated">Evaluated:</label>
-                <input type="text" id="evaluated" name="evaluated"><br><br>
-                <label for="completed">Completed:</label>
-                <input type="text" id="completed" name="completed"><br><br>
-                <label for="incomplete">Incomplete:</label>
-                <input type="text" id="incomplete" name="incomplete"><br><br>
+<div class="worksheet-wrapper">
+
+    <h2 class="worksheet-level-title">{{ clevel.name }}</h2>
+
+    <form id="worksheet-form"
+          method="POST"
+          action="{{ url_for('editsession', session_id=swim_session.sessionid) }}"
+          data-print-url="{{ url_for('editsession', session_id=swim_session.sessionid) }}/print"
+          data-session-id="{{ swim_session.sessionid }}"
+          autocomplete="off">
+
+        {# ── Metadata panel ── #}
+        <div class="metadata-panel content-card">
+            <div class="metadata-row">
+                <label>Session / Barcode</label>
+                <input type="text" name="session_code" value="{{ swim_session.session }}">
             </div>
-            <div class="studentnames">
-                <input type="text" id="student1" name="student1"><br><br>
-                <input type="text" id="student2" name="student2"><br><br>
-                <input type="text" id="student3" name="student3"><br><br>
-                <input type="text" id="student4" name="student4"><br><br>
-                <input type="text" id="student5" name="student5"><br><br>
-                <input type="text" id="student6" name="student6"><br><br>
-                <input type="text" id="student7" name="student7"><br><br>
-                <input type="text" id="student8" name="student8"><br><br>
+            <div class="metadata-row">
+                <label>Weekdays</label>
+                <input type="text" name="weekdays" value="{{ swim_session.weekdays }}">
             </div>
-            <div class="checkboxarray">
-                {% for i in range(1,9) %}
-                        <br><br>
-                        {% for j in range (1, skillcount) %}
-                            <input type="checkbox" id="student{{i}}_skill{{j}}" name="student{{i}}_skill{{j}}"> 
+            <div class="metadata-row">
+                <label>Time</label>
+                <input type="text" name="time" value="{{ swim_session.time }}">
+            </div>
+            <div class="metadata-row">
+                <label>Pool</label>
+                <input type="text" name="pool" value="{{ swim_session.pool }}">
+            </div>
+            <div class="metadata-row">
+                <label>Instructor</label>
+                <span class="metadata-static">{{ swim_session.Instructor.name }}</span>
+            </div>
+            <div class="metadata-counts">
+                <div class="metadata-row">
+                    <label>Enrolled</label>
+                    <input type="number" name="enrolled" value="{{ swim_session.enrolled }}" min="0">
+                </div>
+                <div class="metadata-row">
+                    <label>Evaluated</label>
+                    <input type="number" name="evaluated" value="{{ swim_session.evaluated or '' }}" min="0">
+                </div>
+                <div class="metadata-row">
+                    <label>Completed</label>
+                    <input type="number" name="completed" value="{{ swim_session.completed }}" min="0">
+                </div>
+                <div class="metadata-row">
+                    <label>Incomplete</label>
+                    <input type="number" name="incomplete" value="{{ swim_session.incomplete }}" min="0">
+                </div>
+            </div>
+        </div>
+
+        {# ── Skill grid table ── #}
+        <div class="worksheet-table-wrap">
+            <table class="worksheet-table">
+                <thead>
+                    <tr>
+                        <th class="col-name" rowspan="1">Student Name</th>
+                        {% for skill in skills %}
+                        <th class="col-skill">
+                            <span class="skill-label">{{ skill.name }}</span>
+                        </th>
                         {% endfor %}
-                {% endfor %}
-            </div>
-            <input type="submit" value="Save Changes">
-        </form>
-    </div>
+                        <th class="col-result">RESULTS</th>
+                        <th class="col-delete" aria-label="Remove student"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in range(1, 9) %}
+                    {% set idx = loop.index0 %}
+                    {% set student = students[idx] %}
+                    <tr class="student-row" data-row="{{ i }}">
+                        <td class="name-cell">
+                            <div class="name-cell-inner">
+                                <span class="row-num">{{ i }}.</span>
+                                <input type="hidden" name="student{{ i }}_sid" value="{{ student.sid if student else '' }}">
+                                <input type="text"
+                                       name="student{{ i }}"
+                                       value="{{ student.name if student else '' }}"
+                                       placeholder="Student {{ i }}">
+                            </div>
+                        </td>
+                        {% for skill in skills %}
+                        <td class="checkbox-cell">
+                            {% set skill_result = results_map[idx].get(skill.skillid, 'I') %}
+                            <input type="checkbox"
+                                   name="student{{ i }}_skill{{ skill.skillid }}"
+                                   {% if student and skill_result in ('C', 'Y') %}checked{% endif %}>
+                        </td>
+                        {% endfor %}
+                        <td class="result-cell">
+                            <select name="student{{ i }}_result">
+                                <option value="enrolled" {% if not student or student.status == 'enrolled' %}selected{% endif %}>—</option>
+                                <option value="C" {% if student and student.status == 'C' %}selected{% endif %}>C</option>
+                                <option value="I" {% if student and student.status == 'I' %}selected{% endif %}>I</option>
+                            </select>
+                        </td>
+                        <td class="delete-cell">
+                            <button type="button"
+                                    class="row-delete-btn"
+                                    title="Remove student"
+                                    aria-label="Remove student from row {{ i }}"
+                                    data-delete-url="{{ url_for('editsessiondeletestudent', session_id=swim_session.sessionid, sid=student.sid) if student else '' }}"
+                                    data-sid="{{ student.sid if student else '' }}"
+                                    {% if not student %}hidden{% endif %}>
+                                <svg class="trash-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z"/>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="worksheet-actions">
+            <button type="submit" class="btn-action">Save Changes</button>
+            <button type="button" id="print-btn" class="btn-action btn-print">Print Sheet</button>
+            <span id="print-status" class="print-status" aria-live="polite"></span>
+        </div>
+
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const printBtn = document.getElementById('print-btn');
+    const statusEl = document.getElementById('print-status');
+    const form = document.getElementById('worksheet-form');
+
+    if (!form) return;
+
+    const sessionId = form.dataset.sessionId;
+
+    function syncDeleteButtons() {
+        form.querySelectorAll('.student-row').forEach(function (row) {
+            const sidInput = row.querySelector('input[type="hidden"][name$="_sid"]');
+            const btn = row.querySelector('.row-delete-btn');
+            if (!btn || !sidInput) return;
+
+            const sid = sidInput.value.trim();
+            if (!sid) {
+                btn.hidden = true;
+                btn.dataset.sid = '';
+                btn.dataset.deleteUrl = '';
+                return;
+            }
+
+            btn.hidden = false;
+            btn.dataset.sid = sid;
+            btn.dataset.deleteUrl = '/editsession/' + sessionId + '/student/' + sid + '/delete';
+        });
+    }
+
+    syncDeleteButtons();
+
+    form.querySelectorAll('.row-delete-btn').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+            const deleteUrl = btn.dataset.deleteUrl;
+            const sid = btn.dataset.sid;
+
+            if (!sid || !deleteUrl) {
+                return;
+            }
+
+            btn.disabled = true;
+            statusEl.textContent = 'Removing student…';
+
+            try {
+                const resp = await fetch(deleteUrl, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                });
+                const data = resp.headers.get('Content-Type')?.includes('application/json')
+                    ? await resp.json()
+                    : {};
+
+                if (!resp.ok) {
+                    statusEl.textContent = data.error || 'Could not remove student.';
+                    btn.disabled = false;
+                    return;
+                }
+
+                // Clear the row in the DOM rather than reloading the page.
+                // A reload lets some browsers restore stale hidden sid values on top of
+                // the fresh server HTML, which causes the save to recreate deleted students.
+                const row = btn.closest('.student-row');
+                if (row) {
+                    const nameInput = row.querySelector('input[type="text"]');
+                    const sidInput  = row.querySelector('input[type="hidden"]');
+                    row.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = false; });
+                    const resultSelect = row.querySelector('select');
+                    if (nameInput)    nameInput.value   = '';
+                    if (sidInput)     sidInput.value    = '';
+                    if (resultSelect) resultSelect.value = 'enrolled';
+                    btn.hidden           = true;
+                    btn.disabled         = false;
+                    btn.dataset.sid      = '';
+                    btn.dataset.deleteUrl = '';
+                }
+                statusEl.textContent = 'Student removed.';
+            } catch (err) {
+                statusEl.textContent = 'Could not remove student: ' + err.message;
+                btn.disabled = false;
+            }
+        });
+    });
+
+    if (!printBtn) return;
+
+    const printUrl = form.dataset.printUrl;
+
+    printBtn.addEventListener('click', async function () {
+        statusEl.textContent = 'Generating PDF…';
+        printBtn.disabled = true;
+
+        try {
+            const resp = await fetch(printUrl, {
+                method: 'POST',
+                body: new FormData(form),
+                credentials: 'same-origin',
+            });
+
+            const contentType = resp.headers.get('Content-Type') || '';
+
+            if (!resp.ok) {
+                let msg = 'Print failed. Please try again.';
+                if (contentType.includes('application/json')) {
+                    const data = await resp.json();
+                    if (data.error) msg = data.error;
+                }
+                statusEl.textContent = msg;
+                return;
+            }
+
+            if (!contentType.includes('application/pdf')) {
+                statusEl.textContent = 'Print failed: unexpected response from server.';
+                return;
+            }
+
+            const blob = await resp.blob();
+            const disposition = resp.headers.get('Content-Disposition') || '';
+            const match = disposition.match(/filename[^;=\n]*=(["']?)([^"';\n]*)\1/);
+            const filename = match ? match[2] : 'worksheet.pdf';
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+
+            statusEl.textContent = 'Download started.';
+        } catch (err) {
+            statusEl.textContent = 'Print failed: ' + err.message;
+        } finally {
+            printBtn.disabled = false;
+        }
+    });
+});
+</script>
 {% endblock %}
