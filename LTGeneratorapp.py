@@ -1,5 +1,20 @@
 import logging
 import os
+import sys
+import types
+
+# Allow `from LTGenerator import ...` when the repo root is not named LTGenerator (e.g. Render src/).
+_ROOT = os.path.dirname(os.path.abspath(__file__))
+if os.path.basename(_ROOT) == "LTGenerator":
+    _parent = os.path.dirname(_ROOT)
+    if _parent not in sys.path:
+        sys.path.insert(0, _parent)
+elif "LTGenerator" not in sys.modules:
+    _pkg = types.ModuleType("LTGenerator")
+    _pkg.__path__ = [_ROOT]
+    _pkg.__file__ = os.path.join(_ROOT, "__init__.py")
+    sys.modules["LTGenerator"] = _pkg
+
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from LTGenerator import create_app, db, Base
@@ -10,10 +25,24 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 
 logging.basicConfig(level=logging.INFO)
 
+
+def configure_database_from_env():
+    """Map Render DATABASE_URL to SQLAlchemy before app initialization."""
+    database_url = os.environ.get("DATABASE_URL")
+    if not database_url:
+        return
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    os.environ["SQLALCHEMY_DATABASE_URI"] = database_url
+
+
+configure_database_from_env()
+
 # Initialize the Flask application and login manager
 app = create_app()
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "1") == "1"
+is_debug = os.environ.get("FLASK_DEBUG", "").lower() in ("1", "true", "yes")
+app.config["TEMPLATES_AUTO_RELOAD"] = is_debug
+app.config["DEBUG"] = is_debug
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'

@@ -5,6 +5,15 @@ from sqlalchemy.orm import DeclarativeBase
 import os
 load_dotenv(encoding='utf-8-sig')
 
+def _resolve_database_uri():
+    """Use Render DATABASE_URL in production, local SQLALCHEMY_DATABASE_URI as fallback."""
+    uri = os.environ.get("DATABASE_URL") or os.environ.get("SQLALCHEMY_DATABASE_URI")
+    if not uri:
+        uri = "postgresql://localhost/ltgenerator_postgres_database"
+    if uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql://", 1)
+    return uri
+
 # Base class for all models
 class Base(DeclarativeBase):
   pass
@@ -51,7 +60,7 @@ def create_app():
         template_folder=os.path.join(_PKG_DIR, "templates"),
     )
     # Set the SQLAlchemy database URI and other configuration options
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+    app.config["SQLALCHEMY_DATABASE_URI"] = _resolve_database_uri()
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
     app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
         'pool_pre_ping': True,
