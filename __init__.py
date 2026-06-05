@@ -74,5 +74,3 @@ def create_app():
         db.create_all()
         _ensure_studentresults_cascade()
     return app
-
-from . import create_app, db, Base

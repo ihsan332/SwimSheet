@@ -1,19 +1,35 @@
+import importlib.util
 import logging
 import os
 import sys
-import types
 
-# Allow `from LTGenerator import ...` when the repo root is not named LTGenerator (e.g. Render src/).
 _ROOT = os.path.dirname(os.path.abspath(__file__))
-if os.path.basename(_ROOT) == "LTGenerator":
-    _parent = os.path.dirname(_ROOT)
-    if _parent not in sys.path:
-        sys.path.insert(0, _parent)
-elif "LTGenerator" not in sys.modules:
-    _pkg = types.ModuleType("LTGenerator")
-    _pkg.__path__ = [_ROOT]
-    _pkg.__file__ = os.path.join(_ROOT, "__init__.py")
-    sys.modules["LTGenerator"] = _pkg
+_PKG_NAME = "LTGenerator"
+
+
+def _ensure_ltgenerator_package():
+    """Make repo-root files importable as the LTGenerator package on Render."""
+    if _PKG_NAME in sys.modules and hasattr(sys.modules[_PKG_NAME], "create_app"):
+        return
+
+    if os.path.basename(_ROOT) == _PKG_NAME:
+        _parent = os.path.dirname(_ROOT)
+        if _parent not in sys.path:
+            sys.path.insert(0, _parent)
+        return
+
+    init_path = os.path.join(_ROOT, "__init__.py")
+    spec = importlib.util.spec_from_file_location(
+        _PKG_NAME,
+        init_path,
+        submodule_search_locations=[_ROOT],
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[_PKG_NAME] = module
+    spec.loader.exec_module(module)
+
+
+_ensure_ltgenerator_package()
 
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
