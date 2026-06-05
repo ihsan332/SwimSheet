@@ -1,11 +1,8 @@
 # SwimSheet
 
-For Instructors: Acess the website [here](https://swimsheet.onrender.com/)
-
 A full-stack web application that digitizes paper-based swim lesson tracking for Aquatics Instructors.
 
-Available at: (If link is not here then I havent hosted it yet)
-
+Available [here](https://swimsheet.onrender.com/)
 *Note: This site is only accessible to approved aquatics employees.*
 
 ## Purpose
